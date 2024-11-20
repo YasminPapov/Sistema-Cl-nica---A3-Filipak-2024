@@ -81,6 +81,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
+        
 
         input {
             margin-bottom: 15px;
@@ -119,6 +120,17 @@
             text-align: center;
             font-weight: bold;
         }
+        input, select {
+            margin-bottom: 15px; /* Espaçamento entre os campos */
+             padding: 10px; /* Espaço interno no campo */
+             font-size: 14px; /* Tamanho do texto */
+             border: 1px solid #ccc; /* Borda cinza */
+             border-radius: 5px; /* Bordas arredondadas */
+             width: 100%; /* Largura total do formulário */
+             box-sizing: border-box; /* Garante que padding não extrapole o tamanho */
+        }
+
+
     </style>
 </head>
 <body>
@@ -126,7 +138,7 @@
         <nav>
             <ul>
                 <li><a href="index.php">Início</a></li>
-                <li><a href="cadastro.php">Cadastro de Pacientes</a></li>
+                <li><a href="cadastro.php">Cadastro</a></li>
                 <li><a href="prontuarios.php">Prontuários</a></li>
                 <li><a href="agenda.php">Agenda</a></li>
                 <li><a href="relatorios.php">Relatórios</a></li>
@@ -136,45 +148,61 @@
     </header>
 
 <?php
-require 'config.php';
+require 'config.php'; // Conexão com o banco de dados
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nome = $_POST['nome'];
-    $endereco = $_POST['endereco'];
-    $peso = $_POST['peso'];
-    $altura = $_POST['altura'];
-    $data_nascimento = $_POST['data_nascimento'];
+    // Verifica se todos os campos estão preenchidos
+    if (isset($_POST['nome'], $_POST['email'], $_POST['senha'], $_POST['nivel_acesso'])) {
+        // Recebe os dados do formulário
+        $nome = $_POST['nome'];
+        $email = $_POST['email'];
+        $senha = $_POST['senha']; // Senha digitada pelo usuário
+        $nivel_acesso = $_POST['nivel_acesso'];
 
-    $query = $pdo->prepare("INSERT INTO Paciente (nome, endereco, peso, altura, data_nascimento) VALUES (:nome, :endereco, :peso, :altura, :data_nascimento)");
-    $query->execute(['nome' => $nome, 'endereco' => $endereco, 'peso' => $peso, 'altura' => $altura, 'data_nascimento' => $data_nascimento]);
+        // Criptografa a senha usando password_hash()
+        $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-    echo "Paciente cadastrado com sucesso.";
+        // Insere o usuário no banco de dados com a senha criptografada
+        $query = $pdo->prepare("INSERT INTO usuarios (nome, email, senha_hash, nivel_acesso) VALUES (:nome, :email, :senha_hash, :nivel_acesso)");
+        $query->execute([
+            'nome' => $nome,
+            'email' => $email,
+            'senha_hash' => $senhaHash, // Armazena o hash da senha
+            'nivel_acesso' => $nivel_acesso
+        ]);
+
+        echo "Usuário cadastrado com sucesso!";
+    } else {
+        echo "Por favor, preencha todos os campos.";
+    }
 }
 ?>
 
+
     <main>
         <section>
-            <h1>Cadrastro Paciente</h1>
+            <h1>Cadrastro</h1>
 
             <?php if (isset($erro)): ?>
                 <p class="erro"><?php echo htmlspecialchars($erro); ?></p>
             <?php endif; ?>
 
-            <form method="POST" action="cadastrar_paciente.php">
+            <form method="POST" action="">
                 <label for="nome">Nome:</label>
                 <input type="text" name="nome">
 
-                <label for="endereco">Endereço:</label>
-                <input type="text" name="endereco">
+                <label for="email">Email:</label>
+                <input type="text" name="email">
 
-                <label for="peso">Peso:</label>
-                <input type="number" step="0.01" name="peso">
+                <label for="senha_hash">Senha:</label>
+                <input type="text" step="0.01" name="senha_hash">
 
-                <label for="altura">Altura:</label>
-                <input type="number" step="0.01" name="altura">
-
-                <label for="data_nascimento">Data Nascimento:</label>
-                <input type="date" name="data_nascimento">
+                <label for="nivel_acesso">Nível de acesso:</label>
+                     <select name="nivel_acesso" required>
+                         <option value="aluno">Aluno</option>
+                          <option value="professor">Professor</option>
+                         <option value="administrador">Administrador</option>
+                     </select>
 
                 <button type="submit">Cadastrar</button>
                 </form>
