@@ -8,15 +8,15 @@ $erro = ''; // Variável para armazenar mensagens de erro
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
-    $senha = trim($_POST['senha']);
+    $senha_hash = trim($_POST['senha_hash']);
 
-    if (!empty($email) && !empty($senha)) {
+    if (!empty($email) && !empty($senha_hash)) {
         // Preparar a consulta para verificar o usuário no banco de dados
         $query = $pdo->prepare("SELECT * FROM usuarios WHERE email = :email");
         $query->execute(['email' => $email]);
         $usuario = $query->fetch();
 
-        if ($usuario && password_verify($senha, $usuario['senha_hash'])) {
+        if ($usuario && password_verify($senha_hash, $usuario['senha_hash'])) {
             // Login bem-sucedido
             $_SESSION['usuario_id'] = $usuario['id'];
             $_SESSION['usuario_nome'] = $usuario['nome'];
@@ -160,8 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST" action="">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" placeholder="Digite seu email" required>
-                <label for="senha">Senha:</label>
-                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+                <label for="senha_hash">Senha:</label>
+                <input type="password" id="senha_hash" name="senha_hash" placeholder="Digite sua senha" required>
                 <button type="submit">Entrar</button>
             </form>
         </section>
