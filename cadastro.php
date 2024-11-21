@@ -13,7 +13,7 @@
             font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #add8e6; /* cor do azul claro (fundo da page) */
+            background-color: #add8e6; 
             color: #333;
         
         }
@@ -121,13 +121,13 @@
             font-weight: bold;
         }
         input, select {
-            margin-bottom: 15px; /* Espaçamento entre os campos */
-             padding: 10px; /* Espaço interno no campo */
-             font-size: 14px; /* Tamanho do texto */
-             border: 1px solid #ccc; /* Borda cinza */
-             border-radius: 5px; /* Bordas arredondadas */
-             width: 100%; /* Largura total do formulário */
-             box-sizing: border-box; /* Garante que padding não extrapole o tamanho */
+            margin-bottom: 15px;
+             padding: 10px; 
+             font-size: 14px; 
+             border: 1px solid #ccc; 
+             border-radius: 5px; 
+             width: 100%; 
+             box-sizing: border-box; 
         }
 
 
@@ -148,26 +148,25 @@
     </header>
 
 <?php
-require 'config.php'; // Conexão com o banco de dados
+require 'config.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Verifica se todos os campos estão preenchidos
-    if (isset($_POST['nome'], $_POST['email'], $_POST['senha'], $_POST['nivel_acesso'])) {
-        // Recebe os dados do formulário
+ 
+    if (isset($_POST['nome'], $_POST['email'], $_POST['senha_hash'], $_POST['nivel_acesso'])) {
+      
         $nome = $_POST['nome'];
         $email = $_POST['email'];
-        $senha = $_POST['senha']; // Senha digitada pelo usuário
+        $senha_hash = $_POST['senha_hash'];
         $nivel_acesso = $_POST['nivel_acesso'];
 
-        // Criptografa a senha usando password_hash()
-        $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+    
+        $senhaHash = password_hash($senha_hash, PASSWORD_DEFAULT);
 
-        // Insere o usuário no banco de dados com a senha criptografada
         $query = $pdo->prepare("INSERT INTO usuarios (nome, email, senha_hash, nivel_acesso) VALUES (:nome, :email, :senha_hash, :nivel_acesso)");
         $query->execute([
             'nome' => $nome,
             'email' => $email,
-            'senha_hash' => $senhaHash, // Armazena o hash da senha
+            'senha_hash' => $senhaHash, 
             'nivel_acesso' => $nivel_acesso
         ]);
 
