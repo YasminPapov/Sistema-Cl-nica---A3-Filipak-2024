@@ -142,7 +142,7 @@
                 <li><a href="prontuarios.php">Prontuários</a></li>
                 <li><a href="agenda.php">Agenda</a></li>
                 <li><a href="relatorios.php">Relatórios</a></li>
-                <li><a href="Login.php">Login</a></li>
+                <li><a href="index.php">Login</a></li>
             </ul>
         </nav>
     </header>
