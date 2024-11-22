@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <main>
         <section>
-            <h1>Cadrastro</h1>
+            <h1>Cadastro</h1>
 
             <?php if (isset($erro)): ?>
                 <p class="erro"><?php echo htmlspecialchars($erro); ?></p>
