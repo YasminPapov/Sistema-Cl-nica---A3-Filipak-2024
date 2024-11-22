@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 22/11/2024 às 02:36
+-- Tempo de geração: 22/11/2024 às 02:40
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -103,6 +103,19 @@ CREATE TABLE `forca_muscular` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `notificacoes`
+--
+
+CREATE TABLE `notificacoes` (
+  `id_notificacao` int(11) NOT NULL,
+  `id_usuario` int(11) DEFAULT NULL,
+  `mensagem` text DEFAULT NULL,
+  `lida` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `paciente`
 --
 
@@ -178,6 +191,21 @@ CREATE TABLE `sensibilidade` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `sessao`
+--
+
+CREATE TABLE `sessao` (
+  `id_sessao` int(11) NOT NULL,
+  `id_paciente` int(11) DEFAULT NULL,
+  `id_aluno` int(11) DEFAULT NULL,
+  `data_horario` datetime DEFAULT NULL,
+  `anotacoes` text DEFAULT NULL,
+  `arquivo` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `testes_especiais`
 --
 
@@ -186,6 +214,29 @@ CREATE TABLE `testes_especiais` (
   `id_avaliacao_fisica` int(11) DEFAULT NULL,
   `descricao` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `usuarios`
+--
+
+CREATE TABLE `usuarios` (
+  `id_usuario` int(11) NOT NULL,
+  `nome` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `senha_hash` varchar(255) DEFAULT NULL,
+  `nivel_acesso` enum('Aluno','Professor','Administrador') NOT NULL,
+  `id_professor` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `usuarios`
+--
+
+INSERT INTO `usuarios` (`id_usuario`, `nome`, `email`, `senha_hash`, `nivel_acesso`, `id_professor`) VALUES
+(8, 'henrique', 'henriquemiyahira32@gmail.com', '$2y$10$hr2.sbL2olO.AAqPosW/DOZo5NADICiZB9ZHO2559llY.r38DRMC.', 'Aluno', NULL),
+(9, 'eita', 'chefia@gmail.com', '$2y$10$6cniogOYspJR7AJtpdxV9eQqiJIuDfSQXpnhlezuJbWFqj/WyYFMS', 'Professor', NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -220,6 +271,13 @@ ALTER TABLE `forca_muscular`
   ADD KEY `id_avaliacao_fisica` (`id_avaliacao_fisica`);
 
 --
+-- Índices de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  ADD PRIMARY KEY (`id_notificacao`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
 -- Índices de tabela `paciente`
 --
 ALTER TABLE `paciente`
@@ -247,11 +305,27 @@ ALTER TABLE `sensibilidade`
   ADD KEY `id_avaliacao_fisica` (`id_avaliacao_fisica`);
 
 --
+-- Índices de tabela `sessao`
+--
+ALTER TABLE `sessao`
+  ADD PRIMARY KEY (`id_sessao`),
+  ADD KEY `id_paciente` (`id_paciente`),
+  ADD KEY `id_aluno` (`id_aluno`);
+
+--
 -- Índices de tabela `testes_especiais`
 --
 ALTER TABLE `testes_especiais`
   ADD PRIMARY KEY (`id_teste_especial`),
   ADD KEY `id_avaliacao_fisica` (`id_avaliacao_fisica`);
+
+--
+-- Índices de tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `id_professor` (`id_professor`);
 
 --
 -- AUTO_INCREMENT para tabelas despejadas
@@ -282,6 +356,12 @@ ALTER TABLE `forca_muscular`
   MODIFY `id_forca_muscular` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  MODIFY `id_notificacao` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de tabela `paciente`
 --
 ALTER TABLE `paciente`
@@ -306,10 +386,22 @@ ALTER TABLE `sensibilidade`
   MODIFY `id_sensibilidade` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de tabela `sessao`
+--
+ALTER TABLE `sessao`
+  MODIFY `id_sessao` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de tabela `testes_especiais`
 --
 ALTER TABLE `testes_especiais`
   MODIFY `id_teste_especial` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Restrições para tabelas despejadas
@@ -340,6 +432,12 @@ ALTER TABLE `forca_muscular`
   ADD CONSTRAINT `forca_muscular_ibfk_1` FOREIGN KEY (`id_avaliacao_fisica`) REFERENCES `avaliacao_fisica` (`id_avaliacao_fisica`);
 
 --
+-- Restrições para tabelas `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  ADD CONSTRAINT `notificacoes_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
+
+--
 -- Restrições para tabelas `perimetria`
 --
 ALTER TABLE `perimetria`
@@ -358,10 +456,23 @@ ALTER TABLE `sensibilidade`
   ADD CONSTRAINT `sensibilidade_ibfk_1` FOREIGN KEY (`id_avaliacao_fisica`) REFERENCES `avaliacao_fisica` (`id_avaliacao_fisica`);
 
 --
+-- Restrições para tabelas `sessao`
+--
+ALTER TABLE `sessao`
+  ADD CONSTRAINT `sessao_ibfk_1` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id_paciente`),
+  ADD CONSTRAINT `sessao_ibfk_2` FOREIGN KEY (`id_aluno`) REFERENCES `usuarios` (`id_usuario`);
+
+--
 -- Restrições para tabelas `testes_especiais`
 --
 ALTER TABLE `testes_especiais`
   ADD CONSTRAINT `testes_especiais_ibfk_1` FOREIGN KEY (`id_avaliacao_fisica`) REFERENCES `avaliacao_fisica` (`id_avaliacao_fisica`);
+
+--
+-- Restrições para tabelas `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`id_professor`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
