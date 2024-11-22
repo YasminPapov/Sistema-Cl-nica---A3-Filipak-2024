@@ -194,7 +194,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input type="text" name="email">
 
                 <label for="senha_hash">Senha:</label>
-                <input type="text" step="0.01" name="senha_hash">
+                <input type="password" name="senha_hash">
+
 
                 <label for="nivel_acesso">Nível de acesso:</label>
                      <select name="nivel_acesso" required>
