@@ -148,8 +148,8 @@
     </header>
 
 
-<?php
-/*session_start();
+    <?php
+session_start();
 require 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -157,36 +157,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $arquivo = $_FILES['arquivo'];
 
     $diretorio = 'uploads/';
-    $caminho = $diretorio . basename($arquivo['name']);
-
-    if (move_uploaded_file($arquivo['tmp_name'], $caminho)) {
-        $query = $pdo->prepare("INSERT INTO Sessao (id_paciente, arquivo) VALUES (:id_paciente, :arquivo)");
-        $query->execute(['id_paciente' => $id_paciente, 'arquivo' => $caminho]);
-        echo "Arquivo enviado com sucesso.";
-    } else {
-        echo "Erro ao enviar o arquivo.";
+    if (!is_dir($diretorio)) {
+        mkdir($diretorio, 0777, true);
     }
-}*/
+
+
+    $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
+    $nome_arquivo = uniqid() . '.' . $extensao;
+    $caminho = $diretorio . $nome_arquivo;
+
+    if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif', 'pdf'])) {
+        if (move_uploaded_file($arquivo['tmp_name'], $caminho)) {
+            $query = $pdo->prepare("INSERT INTO Sessao (id_paciente, arquivo) VALUES (:id_paciente, :arquivo)");
+            $query->execute(['id_paciente' => $id_paciente, 'arquivo' => $caminho]);
+            echo "Arquivo enviado com sucesso.";
+        } else {
+            echo "Erro ao enviar o arquivo.";
+        }
+    } else {
+        echo "Tipo de arquivo não permitido.";
+    }
+}
 ?>
+
 
  <main>
         <section>
             <h1>Prontuário</h1>
 
-            
 
-            <form method="POST" action="">
-                <label for="texto">texto</label>
-                <input type="text" name="nome">
+            <form method="POST" action="" enctype="multipart/form-data">
+            <label for="id_paciente">ID do Paciente</label>
+            <input type="text" id="id_paciente" name="id_paciente" placeholder="Digite o ID do paciente" required>
 
-                <label for="texto1">texto1</label>
-                <input type="text" name="nome">
+            <label for="arquivo">Selecione um arquivo</label>
+            <input type="file" id="arquivo" name="arquivo" accept="image/*" required>
 
-                <label for="texto2">texto2</label>
-                <input type="text" name="nome">
+            <button type="submit">Enviar</button>
+        </form>
 
-                <button type="submit">Salvar</button>
-                </form>
+                
         </section>
     </main>
 
