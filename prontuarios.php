@@ -137,6 +137,8 @@
     <header>
         <nav>
             <ul>
+                <li><a href="#">Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></a></li>
+                <li><a href="logout.php">Sair</a></li>
                 <li><a href="index.php">Login</a></li>
                 <li><a href="cadastro.php">Cadastro</a></li>
                 <li><a href="prontuarios.php">Prontuários</a></li>
