@@ -6,6 +6,12 @@ session_start();
 
 $erro = ''; // Variável para armazenar mensagens de erro
 
+// Verifica se o usuário já está logado, caso sim, redireciona para a página inicial
+if (isset($_SESSION['usuario_id'])) {
+    header('Location: index.php');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $senha_hash = trim($_POST['senha_hash']);
@@ -144,6 +150,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li><a href="prontuarios.php">Prontuários</a></li>
                 <li><a href="agenda.php">Agenda</a></li>
                 <li><a href="relatorios.php">Relatórios</a></li>
+                <?php if (isset($_SESSION['usuario_nome'])): ?>
+                <li><a href="#">Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></a></li>
+                <li><a href="logout.php">Sair</a></li>
+                    
+                <?php endif; ?>
             </ul>
         </nav>
     </header>
@@ -166,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </section>
     </main>
 
-    <footer>
+    <footer> 
         <p>&copy; 2024 Clínica. Todos os direitos reservados.</p>
     </footer>
 </body>
