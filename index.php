@@ -1,14 +1,14 @@
 <?php
-// Inclua o arquivo de configuração com a conexão ao banco de dados
+
 require 'config.php';
 
 session_start();
 
-$erro = ''; // Variável para armazenar mensagens de erro
+$erro = ''; 
 
-// Verifica se o usuário já está logado, caso sim, redireciona para a página inicial
+
 if (isset($_SESSION['usuario_id'])) {
-    header('Location: index.php');
+    header('Location: prontuarios.php');
     exit;
 }
 
@@ -17,21 +17,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $senha_hash = trim($_POST['senha_hash']);
 
     if (!empty($email) && !empty($senha_hash)) {
-        // Preparar a consulta para verificar o usuário no banco de dados
+    
         $query = $pdo->prepare("SELECT * FROM usuarios WHERE email = :email");
         $query->execute(['email' => $email]);
         $usuario = $query->fetch();
 
         if ($usuario && password_verify($senha_hash, $usuario['senha_hash'])) {
-            // Login bem-sucedido
+            
             $_SESSION['usuario_id'] = $usuario['id'];
             $_SESSION['usuario_nome'] = $usuario['nome'];
+            $_SESSION['nivel_acesso'] = $usuario['nivel_acesso']; 
+            var_dump($_SESSION);
 
-            // Redirecionar para a página inicial
-            header('Location: index.php');
+        
+            header('Location: prontuarios.php');
             exit;
         } else {
-            // Credenciais inválidas
+          
             $erro = 'Email ou senha inválidos.';
         }
     } else {
@@ -39,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -145,15 +149,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <header>
         <nav>
             <ul>
-                <li><a href="index.php">Login</a></li>
-                <li><a href="cadastro.php">Cadastro</a></li>
-                <li><a href="prontuarios.php">Prontuários</a></li>
-                <li><a href="agenda.php">Agenda</a></li>
-                <li><a href="relatorios.php">Relatórios</a></li>
+              <li><a href="index.php">Login</a></li>
+              <li><a href="cadastro.php">Cadastro</a></li>
+              <li><a href="prontuarios.php">Prontuários</a></li>
+               <li><a href="cadastro_prontuario.php">Cadastro de Prontuários</a></li>
+              <li><a href="exibir_paciente.php">Pacientes</a></li>
+               <li><a href="cadastro_paciente.php">Cadastro de Pacientes</a></li>
                 <?php if (isset($_SESSION['usuario_nome'])): ?>
                 <li><a href="#">Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></a></li>
                 <li><a href="logout.php">Sair</a></li>
-                    
                 <?php endif; ?>
             </ul>
         </nav>

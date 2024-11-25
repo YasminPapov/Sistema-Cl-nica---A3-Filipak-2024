@@ -1,97 +1,124 @@
+<?php
+require 'config.php';
+$dadosAvaliacao = null;
+session_start();
+
+
+
+if (isset($_SESSION['usuario_id'])) {
+  
+    header('Location: prontuarios.php');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $idAvaliacao = $_POST['id_avaliacao'];
+
+    try {
+    
+        $stmtAvaliacao = $pdo->prepare("
+            SELECT * FROM avaliacao WHERE id_avaliacao = :id_avaliacao
+        ");
+        $stmtAvaliacao->execute([':id_avaliacao' => $idAvaliacao]);
+        $dadosAvaliacao = $stmtAvaliacao->fetch(PDO::FETCH_ASSOC);
+
+        if ($dadosAvaliacao) {
+         
+            $stmtAvaliacaoFisica = $pdo->prepare("
+                SELECT * FROM avaliacao_fisica WHERE id_avaliacao = :id_avaliacao
+            ");
+            $stmtAvaliacaoFisica->execute([':id_avaliacao' => $idAvaliacao]);
+            $dadosAvaliacaoFisica = $stmtAvaliacaoFisica->fetch(PDO::FETCH_ASSOC);
+
+      
+            $stmtForcaMuscular = $pdo->prepare("
+                SELECT * FROM forca_muscular WHERE id_avaliacao_fisica = :id_avaliacao_fisica
+            ");
+            $stmtForcaMuscular->execute([':id_avaliacao_fisica' => $dadosAvaliacaoFisica['id_avaliacao_fisica']]);
+            $dadosForcaMuscular = $stmtForcaMuscular->fetch(PDO::FETCH_ASSOC);
+
+            $stmtPerimetria = $pdo->prepare("
+                SELECT * FROM perimetria WHERE id_avaliacao_fisica = :id_avaliacao_fisica
+            ");
+            $stmtPerimetria->execute([':id_avaliacao_fisica' => $dadosAvaliacaoFisica['id_avaliacao_fisica']]);
+            $dadosPerimetria = $stmtPerimetria->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmtPlanoTerapeutico = $pdo->prepare("
+                SELECT * FROM plano_terapeutico WHERE id_avaliacao = :id_avaliacao
+            ");
+            $stmtPlanoTerapeutico->execute([':id_avaliacao' => $idAvaliacao]);
+            $dadosPlanoTerapeutico = $stmtPlanoTerapeutico->fetch(PDO::FETCH_ASSOC);
+
+            $stmtSensibilidade = $pdo->prepare("
+                SELECT * FROM sensibilidade WHERE id_avaliacao_fisica = :id_avaliacao_fisica
+            ");
+            $stmtSensibilidade->execute([':id_avaliacao_fisica' => $dadosAvaliacaoFisica['id_avaliacao_fisica']]);
+            $dadosSensibilidade = $stmtSensibilidade->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmtTestesEspeciais = $pdo->prepare("
+                SELECT * FROM testes_especiais WHERE id_avaliacao_fisica = :id_avaliacao_fisica
+            ");
+            $stmtTestesEspeciais->execute([':id_avaliacao_fisica' => $dadosAvaliacaoFisica['id_avaliacao_fisica']]);
+            $dadosTestesEspeciais = $stmtTestesEspeciais->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (Exception $e) {
+        echo "<p>Erro ao buscar os dados: " . $e->getMessage() . "</p>";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prontuários</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <title>Exibição de Avaliação</title>
     <style>
         body {
-            
-            font-family: 'Montserrat', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #add8e6; 
+            background-color: #f5f5f5;
             color: #333;
-        
         }
-
         header {
             background-color: #0066cc;
             color: white;
-            padding: 5px 20px;
-            
-        }
-
-        nav ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: space-around;
-        }
-
-        nav ul li {
-            display: inline;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        nav ul li a:hover {
-            text-decoration: underline;
-        }
-
-        main {
-            padding: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80vh;
-        }
-
-        section {
-            background-color: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-        }
-
-        h1 {
+            padding: 10px 20px;
             text-align: center;
-            margin-bottom: 10px;
+        }
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
             color: #0066cc;
-            font-size: 18px;
+            margin-bottom: 10px;
         }
-
-        form {
-            display: flex;
-          flex-direction: column;
-          font-size: 14px;
+        hr {
+            border: none;
+            border-top: 2px solid #ddd;
+            margin: 20px 0;
         }
-
         label {
-            margin-bottom: 5px;
             font-weight: bold;
+            display: block;
+            margin-top: 10px;
         }
-        
-
         input {
-            margin-bottom: 15px;
+            width: 100%;
             padding: 10px;
-            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-
         button {
+            width: 100%;
             padding: 10px;
             background-color: #0066cc;
             color: white;
@@ -100,107 +127,168 @@
             font-size: 16px;
             cursor: pointer;
         }
-
         button:hover {
             background-color: #005bb5;
         }
-
-        footer {
-            background-color: #0066cc;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+        .data-section {
+            margin-bottom: 20px;
         }
-
-        p.erro {
-            color: red;
-            text-align: center;
-            font-weight: bold;
+        .data-section h3 {
+            margin-bottom: 10px;
+            color: #333;
         }
-        input, select {
-            margin-bottom: 15px;
-             padding: 10px; 
-             font-size: 14px; 
-             border: 1px solid #ccc; 
-             border-radius: 5px; 
-             width: 100%; 
-             box-sizing: border-box; 
-        }
-
-
     </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="#">Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></a></li>
-                <li><a href="logout.php">Sair</a></li>
-                <li><a href="index.php">Login</a></li>
-                <li><a href="cadastro.php">Cadastro</a></li>
-                <li><a href="prontuarios.php">Prontuários</a></li>
-                <li><a href="agenda.php">Agenda</a></li>
-                <li><a href="relatorios.php">Relatórios</a></li>
-        
-            </ul>
-        </nav>
-    </header>
-
-
-    <?php
-session_start();
-require 'config.php';
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $id_paciente = $_POST['id_paciente'];
-    $arquivo = $_FILES['arquivo'];
-
-    $diretorio = 'uploads/';
-    if (!is_dir($diretorio)) {
-        mkdir($diretorio, 0777, true);
-    }
-
-
-    $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
-    $nome_arquivo = uniqid() . '.' . $extensao;
-    $caminho = $diretorio . $nome_arquivo;
-
-    if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif', 'pdf'])) {
-        if (move_uploaded_file($arquivo['tmp_name'], $caminho)) {
-            $query = $pdo->prepare("INSERT INTO Sessao (id_paciente, arquivo) VALUES (:id_paciente, :arquivo)");
-            $query->execute(['id_paciente' => $id_paciente, 'arquivo' => $caminho]);
-            echo "Arquivo enviado com sucesso.";
-        } else {
-            echo "Erro ao enviar o arquivo.";
+<header>
+    <style>
+        header {
+            background-color: #0066cc;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
         }
-    } else {
-        echo "Tipo de arquivo não permitido.";
-    }
-}
-?>
 
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px; 
+        }
 
- <main>
-        <section>
-            <h1>Prontuário</h1>
+        header nav ul li {
+            display: inline;
+        }
 
+        header nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
 
-            <form method="POST" action="" enctype="multipart/form-data">
-            <label for="id_paciente">ID do Paciente</label>
-            <input type="text" id="id_paciente" name="id_paciente" placeholder="Digite o ID do paciente" required>
+        header nav ul li a:hover {
+            color: #ffd700; 
+        }
+    </style>
+    <nav>
+        <ul>
+            <li><a href="index.php">Login</a></li>
+            <li><a href="cadastro.php">Cadastro</a></li>
+            <li><a href="prontuarios.php">Prontuários</a></li>
+            <li><a href="cadastro_prontuario.php">Cadastro de Prontuários</a></li>
+            <li><a href="exibir_paciente.php">Pacientes</a></li>
+            <li><a href="cadastro_paciente.php">Cadastro de Pacientes</a></li>
+            <?php if (isset($_SESSION['usuario_nome'])): ?>
+    <li><a href="#">Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></a></li>
+    <li><a href="logout.php">Sair</a></li>
+<?php endif; ?>
 
-            <label for="arquivo">Selecione um arquivo</label>
-            <input type="file" id="arquivo" name="arquivo" accept="image/*" required>
-
-            <button type="submit">Enviar</button>
+        </ul>
+    </nav>
+</header>
+    <main>
+        <form method="POST" action="">
+            <label for="id_avaliacao">ID da Avaliação:</label>
+            <input type="number" id="id_avaliacao" name="id_avaliacao" required>
+            <button type="submit">Buscar</button>
         </form>
 
-                
-        </section>
+        <?php if ($dadosAvaliacao): ?>
+            <div class="data-section">
+                <h3>Avaliação</h3>
+                <p><strong>ID Paciente:</strong> <?= htmlspecialchars($dadosAvaliacao['id_paciente']) ?></p>
+                <p><strong>Data da Avaliação:</strong> <?= htmlspecialchars($dadosAvaliacao['data_avaliacao']) ?></p>
+                <p><strong>Queixa Principal:</strong> <?= htmlspecialchars($dadosAvaliacao['queixa_principal']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['comorbidades']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['medicamentos_uso_continuo']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['medicamentos_atuais']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['tratamentos_complementares']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['diagnostico_clinico']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['cid']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['historia_doenca_atual']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['historia_doenca_pregressa']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['antecedentes_cirurgicos']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['atividades_afetadas']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['fatores_ambientais']) ?></p>
+                <p><strong>Outras Queixas:</strong> <?= htmlspecialchars($dadosAvaliacao['observacoes']) ?></p>
+            </div>
+            <hr>
+
+            <div class="data-section">
+                <h3>Avaliação Física</h3>
+                <p><strong>Postura Cabeça:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_cabeca']) ?></p>
+                <p><strong>Postura Clavicula:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_clavicula']) ?></p>
+                <p><strong>Postura Ombro:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_ombro']) ?></p>
+                <p><strong>Postura Cotovelo:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_cotovelo']) ?></p>
+                <p><strong>Postura Antebraço:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_antebraco']) ?></p>
+                <p><strong>Postura Mãos:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_maos']) ?></p>
+                <p><strong>Postura Eias:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_eias']) ?></p>
+                <p><strong>Postura Joelhos:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_joelhos']) ?></p>
+                <p><strong>Postura Tornozelos:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_tornozelos']) ?></p>
+                <p><strong>Postura Patelas:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_patelas']) ?></p>
+                <p><strong>Inspeção Palpação:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['inspecao_palapacao']) ?></p>
+                <p><strong>Postura Coluna Toracica:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_coluna_toracica']) ?></p>
+                <p><strong>Postura Coluna Cervical:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_coluna_cervical']) ?></p>
+                <p><strong>Postura Coluna Lombar:</strong> <?= htmlspecialchars($dadosAvaliacaoFisica['postura_coluna_lombar']) ?></p>
+            </div>
+            <hr>
+
+            <div class="data-section">
+                <h3>Força Muscular</h3>
+                <p><strong>Grau de Força:</strong> <?= htmlspecialchars($dadosForcaMuscular['grau_forca']) ?></p>
+            </div>
+            <hr>
+            <div class="data-section">
+
+         <h3>Perimetria</h3>
+         <?php if (!empty($dadosPerimetria)): ?>
+              <?php foreach ($dadosPerimetria as $perimetria): ?>
+                  <p><strong>Região:</strong> <?= isset($perimetria['regiao']) ? htmlspecialchars($perimetria['regiao']) : 'Não informado' ?></p>
+                  <p><strong>Medida 1:</strong> <?= isset($perimetria['medida_1']) ? htmlspecialchars($perimetria['medida_1']) : 'Não informado' ?></p>
+                   <p><strong>Medida 2:</strong> <?= isset($perimetria['medida_2']) ? htmlspecialchars($perimetria['medida_2']) : 'Não informado' ?></p>
+                   <p><strong>Medida 3:</strong> <?= isset($perimetria['medida_3']) ? htmlspecialchars($perimetria['medida_3']) : 'Não informado' ?></p>
+                <?php endforeach; ?>
+         <?php else: ?>
+                <p>Nenhuma informação de perimetria encontrada.</p>
+            <?php endif; ?>
+        </div>
+
+        <div class="data-section">
+          <h3>Sensibilidade</h3>
+           <?php if (!empty($dadosSensibilidade)): ?>
+             <?php foreach ($dadosSensibilidade as $sensibilidade): ?>
+                  <p><strong>Local:</strong> <?= isset($sensibilidade['local']) ? htmlspecialchars($sensibilidade['local']) : 'Não informado' ?></p>
+                  <p><strong>Sensibilidade Tátil Direito:</strong> <?= isset($sensibilidade['sensibilidade_tatil_direito']) ? htmlspecialchars($sensibilidade['sensibilidade_tatil_direito']) : 'Não informado' ?></p>
+                   <p><strong>Sensibilidade Tátil Esquerdo:</strong> <?= isset($sensibilidade['sensibilidade_tatil_esquerdo']) ? htmlspecialchars($sensibilidade['sensibilidade_tatil_esquerdo']) : 'Não informado' ?></p>
+                    <p><strong>Sensibilidade Dolorosa Direito:</strong> <?= isset($sensibilidade['sensibilidade_dolorosa_direito']) ? htmlspecialchars($sensibilidade['sensibilidade_dolorosa_direito']) : 'Não informado' ?></p>
+                    <p><strong>Sensibilidade Dolorosa Esquerdo:</strong> <?= isset($sensibilidade['sensibilidade_dolorosa_esquerdo']) ? htmlspecialchars($sensibilidade['sensibilidade_dolorosa_esquerdo']) : 'Não informado' ?></p>
+                    <p><strong>Sensibilidade Térmica Direito:</strong> <?= isset($sensibilidade['sensibilidade_termica_direito']) ? htmlspecialchars($sensibilidade['sensibilidade_termica_direito']) : 'Não informado' ?></p>
+                 <p><strong>Sensibilidade Térmica Esquerdo:</strong> <?= isset($sensibilidade['sensibilidade_termica_esquerdo']) ? htmlspecialchars($sensibilidade['sensibilidade_termica_esquerdo']) : 'Não informado' ?></p>
+              <?php endforeach; ?>
+            <?php else: ?>
+                <p>Nenhuma informação de sensibilidade encontrada.</p>
+         <?php endif; ?>
+        </div>
+
+        <div class="data-section">
+           <h3>Testes Especiais</h3>
+          <?php if (!empty($dadosTestesEspeciais)): ?>
+                <?php foreach ($dadosTestesEspeciais as $teste): ?>
+                 <p><strong>Descrição:</strong> <?= isset($teste['descricao']) ? htmlspecialchars($teste['descricao']) : 'Não informado' ?></p>
+                <?php endforeach; ?>
+          <?php else: ?>
+              <p>Nenhum teste especial encontrado.</p>
+           <?php endif; ?>
+    </div>
+
+
+        <?php elseif ($_SERVER['REQUEST_METHOD'] == 'POST'): ?>
+            <p>Nenhuma avaliação encontrada com o ID informado.</p>
+        <?php endif; ?>
     </main>
-
-</form>
-
+</body>
+</html>

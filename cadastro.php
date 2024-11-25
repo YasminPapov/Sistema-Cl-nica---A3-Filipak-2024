@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -134,21 +138,60 @@
     </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="index.php">Login</a></li>
-                <li><a href="cadastro.php">Cadastro</a></li>
-                <li><a href="prontuarios.php">Prontuários</a></li>
-                <li><a href="agenda.php">Agenda</a></li>
-                <li><a href="relatorios.php">Relatórios</a></li>
-        
-            </ul>
-        </nav>
-    </header>
+<header>
+    <style>
+        header {
+            background-color: #0066cc;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px; 
+        }
+
+        header nav ul li {
+            display: inline;
+        }
+
+        header nav ul li a {
+            text-decoration: none;
+            color: white; 
+            font-size: 16px;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        header nav ul li a:hover {
+            color: #ffd700;
+        }
+    </style>
+    <nav>
+        <ul>
+            <li><a href="index.php">Login</a></li>
+            <li><a href="cadastro.php">Cadastro</a></li>
+            <li><a href="prontuarios.php">Prontuários</a></li>
+            <li><a href="cadastro_prontuario.php">Cadastro de Prontuários</a></li>
+            <li><a href="exibir_paciente.php">Pacientes</a></li>
+            <li><a href="cadastro_paciente.php">Cadastro de Pacientes</a></li>
+            <?php if (isset($_SESSION['usuario_nome'])): ?>
+    <li><a href="#">Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></a></li>
+    <li><a href="logout.php">Sair</a></li>
+<?php endif; ?>
+        </ul>
+    </nav>
+</header>
 
 <?php
 require 'config.php'; 
+
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
  
